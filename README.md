@@ -1,7 +1,7 @@
 Architecture:
 - Deep seek style MoE (Auxillary loss free routing -- Different from Qwen's usual routing: https://arxiv.org/abs/2408.15664)
 - Zero Centered RMS Norm /w Weight Decay (Concept from Qwen3-Next: https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct)
-- Gated Attention (G1 per head variant specifically -- https://arxiv.org/abs/2505.06708)
+- Latent Multi-Head Attention (https://arxiv.org/abs/2412.19437 and https://arxiv.org/abs/2506.09342)
 - Gated Delta Net (Using FLA https://arxiv.org/abs/2412.06464)
 
 Auxillary stuff:
@@ -22,6 +22,7 @@ Infer (hard coded to use checkpoint 10):
 ```
 uv run python basic_inf.py
 ```
+
 
 
 
