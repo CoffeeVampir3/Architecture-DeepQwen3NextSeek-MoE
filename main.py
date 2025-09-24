@@ -29,7 +29,7 @@ class TextDataset(Dataset):
         return {'input_ids': self.input_ids[idx]}
 
 def load_and_preprocess_data(max_length=510):
-    dataset = load_dataset("skeskinen/TinyStories-hf", split="train") #[:1%]
+    dataset = load_dataset("skeskinen/TinyStories-hf", split="train[:1%]") #[:1%]
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -93,7 +93,7 @@ def build_weight_decay_optm(model, learning_rate):
 
 import math
 class CosineWarmupScheduler:
-    def __init__(self, optimizer, warmup_steps=1000, total_steps=None, peak_lr=2e-6, min_lr=1e-7):
+    def __init__(self, optimizer, warmup_steps=1000, total_steps=None, peak_lr=2e-6, min_lr=8e-7):
         self.optimizer = optimizer
         self.warmup_steps = warmup_steps
         self.total_steps = total_steps
@@ -113,7 +113,15 @@ class CosineWarmupScheduler:
         self.step_count += 1
         return lr
 
-def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning_rate=2e-6, update_rate=4e-5):
+# Used for control testing
+class LinearLRScheduler:
+    def __init__(self, optimizer, warmup_steps=1000, total_steps=None, peak_lr=2e-6):
+        self.peak_lr = peak_lr
+
+    def step(self):
+        return self.peak_lr
+
+def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning_rate=1e-4, update_rate=4e-5):
     device = torch.device("cuda")
     model.to(device)
 
@@ -130,7 +138,7 @@ def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning
     global_step = 0
 
     total_steps = len(train_loader) * num_epochs
-    scheduler = CosineWarmupScheduler(optimizer, warmup_steps=2000, total_steps=total_steps, peak_lr=learning_rate)
+    scheduler = LinearLRScheduler(optimizer, warmup_steps=2000, total_steps=total_steps, peak_lr=learning_rate)
 
     for epoch in range(num_epochs):
         model.train()
@@ -171,7 +179,7 @@ def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning
             'loss/epoch_loss': avg_loss,
             'training/epoch_time': epoch_time,
             'training/batches_per_epoch': len(train_loader),
-            'training/tokens_per_second': len(train_loader) * batch_size * 255 / epoch_time
+            'training/tokens_per_second': len(train_loader) * batch_size * 510 / epoch_time
         }
         logger.log(epoch_metrics, step=global_step, detailed_logging=True)
 

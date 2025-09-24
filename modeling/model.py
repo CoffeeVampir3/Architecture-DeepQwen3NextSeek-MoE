@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from .transformer_block import TransformerBlock
 from .gdn_block import GatedDeltaNetBlock
 
-from .mla import MLA
+from .mla import GatedMLA
 from .attention import GatedAttention
 
 class MoEModel(nn.Module):
@@ -16,10 +16,10 @@ class MoEModel(nn.Module):
         self.layers = nn.ModuleList(
             [TransformerBlock(config, GatedAttention, True)] +
             [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
-            [TransformerBlock(config, MLA, False)] +
+            [TransformerBlock(config, GatedMLA, False)] +
             [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
             [TransformerBlock(config, GatedAttention, True)] +
-            [TransformerBlock(config, MLA, False)] +
+            [TransformerBlock(config, GatedMLA, False)] +
             [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
             [TransformerBlock(config, GatedAttention, True)]
         )

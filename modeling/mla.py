@@ -65,7 +65,7 @@ def apply_rotary_pos_emb(q, k, cos, sin, position_ids, unsqueeze_dim=1):
     k_embed = (k * cos) + (rotate_half(k) * sin)
     return q_embed, k_embed
 
-class MLA(nn.Module):
+class GatedMLA(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.attention_dropout = config.attention_dropout
@@ -77,6 +77,7 @@ class MLA(nn.Module):
             self.hidden_size,
             bias=False
         )
+        self.full_gate_proj = nn.Linear(self.hidden_size, self.num_heads * self.v_head_dim, bias=False)
 
         self.qk_nope_head_dim = config.qk_nope_head_dim
         self.qk_rope_head_dim = config.qk_rope_head_dim
@@ -128,6 +129,8 @@ class MLA(nn.Module):
         nn.init.normal_(self.q_up_proj.weight, mean=0.0, std=0.02)
         nn.init.normal_(self.kv_up_proj.weight, mean=0.0, std=0.02)
         nn.init.xavier_normal_(self.out_proj.weight)
+
+        nn.init.zeros_(self.full_gate_proj.weight)
 
     def forward(self, hidden_states, position_ids, attention_mask=None):
         bsz, q_len, _ = hidden_states.size()
@@ -206,11 +209,16 @@ class MLA(nn.Module):
         attn_weights = F.dropout(
             attn_weights, p=self.attention_dropout, training = self.training
         )
-        output = torch.matmul(
+        attn_output = torch.matmul(
             attn_weights, value_states
             # (b, num_head, q_len, q_len)
             # value (b, nums_head, seq_len, v_head_dim)
         )
-        output = rearrange(output, 'b h s v_head_dim -> b s (h v_head_dim)')
-        output = self.out_proj(output)
-        return output
+
+        attn_output = rearrange(attn_output, 'b h s d -> b s h d')
+        gate_scores = torch.sigmoid(self.full_gate_proj(hidden_states))
+        per_head_gate_scores = gate_scores.view(bsz, q_len, self.num_heads, self.v_head_dim)
+        attn_output = attn_output * per_head_gate_scores
+
+        attn_output = rearrange(attn_output, 'b s h d -> b s (h d)')
+        return self.out_proj(attn_output)
