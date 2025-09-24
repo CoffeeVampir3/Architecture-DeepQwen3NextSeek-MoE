@@ -1,3 +1,5 @@
+Combination of MLA and Gated Delta Net using Deep Seek's routing. Should probably gate the MLA here.
+
 Architecture:
 - Deep seek style MoE (Auxillary loss free routing -- Different from Qwen's usual routing: https://arxiv.org/abs/2408.15664)
 - Zero Centered RMS Norm /w Weight Decay (Concept from Qwen3-Next: https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct)
@@ -27,6 +29,7 @@ Logs to: `logs/moe_training`
 ```
 tensorboard --logdir=logs/moe_training --reload_multifile=true --reload_interval=15
 ```
+
 
 
 
