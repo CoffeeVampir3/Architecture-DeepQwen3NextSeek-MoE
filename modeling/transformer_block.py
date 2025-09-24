@@ -2,15 +2,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .mla import MLA
 from .moe_layer import MoELayer
 from .zRMSNorm import ZeroCenteredRMSNorm
 
 class TransformerBlock(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, layer_type, input_layernorm=True):
         super().__init__()
-        #self.input_layernorm = ZeroCenteredRMSNorm(config.hidden_size)
-        self.self_attn = MLA(config)
+        self.input_layernorm = (
+            ZeroCenteredRMSNorm(config.hidden_size)
+            if input_layernorm
+            else nn.Identity()
+        )
+        self.self_attn = layer_type(config)
         self.post_attention_layernorm = ZeroCenteredRMSNorm(config.hidden_size)
         self.mlp = MoELayer(config)
 
@@ -18,7 +21,7 @@ class TransformerBlock(nn.Module):
         # Input shape: [batch_size, seq_len, hidden_size]
 
         residual = hidden_states
-        #hidden_states = self.input_layernorm(hidden_states)  # [batch_size, seq_len, hidden_size]
+        hidden_states = self.input_layernorm(hidden_states)  # [batch_size, seq_len, hidden_size]
         hidden_states = self.self_attn(
             hidden_states,
             attention_mask=attention_mask,

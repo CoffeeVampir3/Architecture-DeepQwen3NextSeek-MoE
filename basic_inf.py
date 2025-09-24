@@ -39,7 +39,7 @@ class MoEInference:
         return self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
 
 def main():
-    inference = MoEInference(model_path="./checkpoints/checkpoint_epoch_2.safetensors")
+    inference = MoEInference(model_path="./checkpoints/checkpoint_epoch_1.safetensors")
     result = inference.generate("And the last bear looked")
     print(result)
 

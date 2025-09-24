@@ -5,14 +5,23 @@ import torch.nn.functional as F
 from .transformer_block import TransformerBlock
 from .gdn_block import GatedDeltaNetBlock
 
+from .mla import MLA
+from .attention import GatedAttention
+
 class MoEModel(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.embedding = nn.Embedding(config.vocab_size, config.embed_size)
 
         self.layers = nn.ModuleList(
-            [TransformerBlock(config)] +
-            [GatedDeltaNetBlock(config, layer_idx=i) for i in range(config.transformer_depth - 1)]
+            [TransformerBlock(config, GatedAttention, True)] +
+            [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
+            [TransformerBlock(config, MLA, False)] +
+            [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
+            [TransformerBlock(config, GatedAttention, True)] +
+            [TransformerBlock(config, MLA, False)] +
+            [GatedDeltaNetBlock(config, layer_idx=i) for i in range(3)] +
+            [TransformerBlock(config, GatedAttention, True)]
         )
 
         self.output_layer = nn.Linear(config.embed_size, config.vocab_size)

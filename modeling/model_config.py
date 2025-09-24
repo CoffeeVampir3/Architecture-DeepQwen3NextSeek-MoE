@@ -10,10 +10,10 @@ class ModelConfig:
 
     # MoE
     intermediate_size: int = 256+64
-    n_experts: int = 48
-    n_shared_experts: int = 16
+    n_experts: int = 8
+    n_shared_experts: int = 2
     n_routed_experts: int = n_experts - n_shared_experts
-    n_experts_per_token = 16
+    n_experts_per_token = 3
 
     # Traditional Attention
     n_attention_heads: int = 16
