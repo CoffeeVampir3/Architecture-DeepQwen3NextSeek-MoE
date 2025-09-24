@@ -23,6 +23,11 @@ Infer (hard coded to use checkpoint 10):
 uv run python basic_inf.py
 ```
 
+Logs to: `logs/moe_training`
+```
+tensorboard --logdir=logs/moe_training --reload_multifile=true --reload_interval=15
+```
+
 
 
 
