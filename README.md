@@ -1,4 +1,4 @@
-Combination of MLA and Gated Delta Net using Deep Seek's routing. Should probably gate the MLA here.
+Combination of MLA and Gated Delta Net using Deep Seek's routing with a general large MoE. The early MoE doesn't stabilize very well and sadly we probably need an auxillary loss to stabilize the early training. Should probably gate the MLA here.
 
 Architecture:
 - Deep seek style MoE (Auxillary loss free routing -- Different from Qwen's usual routing: https://arxiv.org/abs/2408.15664)
@@ -29,6 +29,7 @@ Logs to: `logs/moe_training`
 ```
 tensorboard --logdir=logs/moe_training --reload_multifile=true --reload_interval=15
 ```
+
 
 
 
