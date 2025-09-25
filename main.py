@@ -121,7 +121,7 @@ class LinearLRScheduler:
     def step(self):
         return self.peak_lr
 
-def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning_rate=1e-4, update_rate=4e-5):
+def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning_rate=2e-6, update_rate=4e-5):
     device = torch.device("cuda")
     model.to(device)
 
@@ -138,7 +138,7 @@ def train(model, train_dataset, tokenizer, num_epochs=1, batch_size=32, learning
     global_step = 0
 
     total_steps = len(train_loader) * num_epochs
-    scheduler = LinearLRScheduler(optimizer, warmup_steps=2000, total_steps=total_steps, peak_lr=learning_rate)
+    scheduler = CosineWarmupScheduler(optimizer, warmup_steps=2000, total_steps=total_steps, peak_lr=learning_rate)
 
     for epoch in range(num_epochs):
         model.train()
