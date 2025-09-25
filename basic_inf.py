@@ -22,16 +22,17 @@ class MoEInference:
 
     def generate(self, prompt, max_length=50):
         input_ids = self.tokenizer.encode(prompt, return_tensors="pt").to(self.device)
+        attention_mask = torch.ones_like(input_ids).to(self.device)
 
         with torch.no_grad():
             for _ in range(max_length):
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=self.device.type=='cuda'):
-                    outputs, _ = self.model(input_ids)
+                    outputs, _ = self.model(input_ids, attention_mask=attention_mask)
 
                 next_token_logits = outputs[:, -1, :].float()
                 next_token = next_token_logits.argmax(dim=-1, keepdim=True)
                 input_ids = torch.cat([input_ids, next_token], dim=-1)
-                print(next_token)
+                attention_mask = torch.cat([attention_mask, torch.ones((1, 1), device=self.device)], dim=-1)
 
                 if next_token.item() == self.tokenizer.eos_token_id:
                     break
