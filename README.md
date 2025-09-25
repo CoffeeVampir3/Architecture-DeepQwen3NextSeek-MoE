@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/232596713892872193?logo=discord)](https://discord.gg/2JhHVh7CGu)
+
 Combination of MLA and Gated Delta Net using Deep Seek's routing with a general large MoE. The early MoE doesn't stabilize very well and sadly we probably need an auxillary loss to stabilize the early training. Should probably gate the MLA here.
 
 Architecture:
@@ -30,6 +32,7 @@ Logs to: `logs/moe_training`
 ```
 tensorboard --logdir=logs/moe_training --reload_multifile=true --reload_interval=15
 ```
+
 
 
 
